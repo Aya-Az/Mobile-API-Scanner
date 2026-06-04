@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rapport de Sécurité - https://httpbin.org</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; color: #1e293b; min-height: 100vh; }
+  .header { background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); padding: 40px; border-bottom: 1px solid #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .header h1 { font-size: 2rem; color: #0f172a; font-weight: 700; }
+  .header p { color: #64748b; margin-top: 8px; }
+  .badge-scanner { display: inline-block; background: #2563eb; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-bottom: 12px; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px; }
+  .stat-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .stat-card .value { font-size: 2.5rem; font-weight: 800; }
+  .stat-card .label { color: #64748b; font-size: 14px; margin-top: 4px; }
+  .risk-card { background: #ffffff; border: 2px solid #0ea5e9; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .risk-score { font-size: 4rem; font-weight: 900; color: #0ea5e9; }
+  .risk-level { font-size: 1.5rem; color: #0ea5e9; font-weight: 700; }
+  .section { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .section h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; color: #0f172a; }
+  .vuln-card { border-radius: 8px; padding: 16px; margin-bottom: 16px; border: 1px solid #e2e8f0; }
+  .vuln-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .severity-badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .vuln-title { font-weight: 700; font-size: 1rem; color: #0f172a; flex: 1; }
+  .cvss-score { font-size: 12px; color: #64748b; font-weight: 600; }
+  .vuln-desc { color: #475569; font-size: 14px; margin-bottom: 12px; }
+  .vuln-meta { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #374151; }
+  .vuln-meta code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 12px; word-break: break-all; color: #1e293b; }
+  .tag { background: #e2e8f0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; color: #1e293b; }
+  .recommendation { background: #f0fdf4; padding: 8px 12px; border-radius: 6px; border-left: 3px solid #22c55e; color: #166534; }
+  .progress-bar { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 6px; }
+  .progress-fill { height: 100%; background: #2563eb; border-radius: 4px; transition: width 1s; }
+  .rec-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 8px; }
+  .rec-priority { padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .rec-priority.critical { background: #ef4444; color: white; }
+  .rec-priority.high { background: #f97316; color: white; }
+  .rec-item p { color: #64748b; font-size: 13px; margin-top: 4px; }
+  .footer { text-align: center; color: #94a3b8; padding: 30px; font-size: 13px; }
+  .endpoint-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .endpoint-table th { background: #f8fafc; padding: 10px; text-align: left; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+  .endpoint-table td { padding: 8px 10px; border-top: 1px solid #e2e8f0; color: #475569; }
+  .endpoint-table tr:hover { background: #f8fafc; }
+  .status-200 { color: #22c55e; } .status-401 { color: #f97316; } .status-403 { color: #ef4444; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="max-width:1200px; margin:0 auto;">
+    <span class="badge-scanner"> Mobile API Security Scanner v1.0</span>
+    <h1>Rapport de Vulnérabilités API</h1>
+    <p>Cible: <strong>https://httpbin.org</strong> · Scan: 2026-06-04T21:54:07 · ID: c12ab6a1</p>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Score de risque -->
+  <div class="risk-card">
+    <div style="color:#64748b; font-size:14px; margin-bottom:8px;">SCORE DE RISQUE GLOBAL</div>
+    <div class="risk-score">5.3/10</div>
+    <div class="risk-level">Niveau: MOYEN</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid-3">
+    <div class="stat-card"><div class="value" style="color:#ef4444">1</div><div class="label"> Critique</div></div>
+    <div class="stat-card"><div class="value" style="color:#f97316">2</div><div class="label"> Élevé</div></div>
+    <div class="stat-card"><div class="value" style="color:#0ea5e9">4</div><div class="label"> Moyen</div></div>
+    <div class="stat-card"><div class="value" style="color:#22c55e">3</div><div class="label"> Faible</div></div>
+    <div class="stat-card"><div class="value" style="color:#2563eb">0</div><div class="label"> Endpoints</div></div>
+    <div class="stat-card"><div class="value" style="color:#8b5cf6">10</div><div class="label"> Total vulnérabilités</div></div>
+  </div>
+
+  <!-- Couverture OWASP -->
+  <div class="section">
+    <h2> Couverture OWASP</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <span>OWASP Mobile Top 10</span>
+          <strong>10%</strong>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:10.0%; background:#2563eb;"></div></div>
+        <div style="color:#94a3b8; font-size:12px; margin-top:4px;">Testés: M8</div>
+      </div>
+      <div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <span>OWASP API Security Top 10</span>
+          <strong>10%</strong>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:10.0%; background:#8b5cf6;"></div></div>
+        <div style="color:#94a3b8; font-size:12px; margin-top:4px;">Testés: API8</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommandations -->
+  <div class="section"><h2> Recommandations Prioritaires</h2>
+            <div class="rec-item">
+                <span class="rec-priority critical">IMMÉDIATE</span>
+                <div><strong>CORS reflète l'origine arbitraire</strong><p>Valider l'origine contre une whitelist. Ne jamais combiner ACAO dynamique avec Allow-Credentials: true.</p></div>
+            </div>
+            <div class="rec-item">
+                <span class="rec-priority high">HAUTE</span>
+                <div><strong>Header de sécurité manquant: Strict-Transport-Security</strong><p>Ajouter le header: Strict-Transport-Security</p></div>
+            </div>
+            <div class="rec-item">
+                <span class="rec-priority high">HAUTE</span>
+                <div><strong>Header de sécurité manquant: Content-Security-Policy</strong><p>Ajouter le header: Content-Security-Policy</p></div>
+            </div></div>
+
+  <!-- Vulnérabilités -->
+  <div class="section">
+    <h2> Vulnérabilités Détectées (10)</h2>
+    
+            <div class="vuln-card" style="border-left: 4px solid #ef4444; background: #fef2f2;">
+                <div class="vuln-header">
+                    <span class="severity-badge" style="background:#ef4444; color:white;">CRITICAL</span>
+                    <span class="vuln-title">CORS reflète l'origine arbitraire</span>
+                    <span class="cvss-score">CVSS: 9.5</span>
+                </div>
+                <p class="vuln-desc">L'API reflète n'importe quelle origine dans ACAO, permettant des attaques cross-origin.</p>
+                <div class="vuln-meta">
+                    <div><strong> URL:</strong> <code>https://httpbin.org</code></div>
+                    <div><strong> Evidence:</strong> <code>Origin evil.com acceptée. Credentials: true</code></div>
+                    <div><strong> OWASP Mobile:</strong> <span class="tag">M8</span>
+                         <strong> OWASP API:</strong> <span class="tag">API8</span>
+                         <strong> CWE:</strong> <span class="tag">CWE-942</span></div>
+                    <div class="recommendation"><strong> Recommandation:</strong> Valider l'origine contre une whitelist. Ne jamais combiner ACAO dynamique avec Allow-Credentials: true.</div>
+                </div>
+            </div>
+            <div class="vuln-card" style="border-left: 4px solid #f97316; background: #fff7ed;">
+                <div class="vuln-header">
+                    <span class="severity-badge" style="background:#f97316; color:white;">HIGH</span>
+                    <span class="vuln-title">Header de sécurité manquant: Strict-Transport-Security</span>
+                    <span class="cvss-score">CVSS: 7.5</span>
+                </div>
+                <p class="vuln-desc">Le header Strict-Transport-Security est absent. Force HTTPS (HSTS)</p>
+                <div class="vuln-meta">
+                    <div><strong> URL:</strong> <code>https://httpbin.org</code></div>
+                    <div><strong> Evidence:</strong> <code>Header 'Strict-Transport-Security' absent de la réponse</code></div>
+                    <div><strong> OWASP Mobile:</strong> <span class="tag">M8</span>
+                         <strong> OWASP API:</strong> <span class="tag">API8</span>
+                         <strong> CWE:</strong> <span class="tag">CWE-16</span></div>
+                    <div class="recommendation"><strong> Recommandation:</strong> Ajouter le header: Strict-Transport-Security</div>
+                </div>
+            </div>
+            <div class="vuln-card" style="border-left: 4px solid #f97316; background: #fff7ed;">
+                <div class="vuln-header">
+                    <span class="severity-badge" style="background:#f97316; color:white;">HIGH</span>
+                    <span class="vuln-title">Header de sécurité manquant: Content-Security-Policy</span>
+                    <span class="cvss-score">CVSS: 7.5</span>
+                </div>
+                <p class="vuln-desc">Le header Content-Security-Policy est absent. Politique de sécurité du contenu</p>
+                <div class="vuln-meta">
+                    <div><strong> URL:</strong> <code>https://httpbin.org</code></div>
+                    <div><strong> Evidence:</strong> <code>Header 'Content-Security-Policy' absent de la réponse</code></div>
+                    <div><strong> OWASP Mobile:</strong> <span class="tag">M8</span>
+                         <strong> OWASP API:</strong> <span class="tag">API8</span>
+                         <strong> CWE:</strong> <span class="tag">CWE-16</span></div>
+                    <div class="recommendation"><strong> Recommandation:</strong> Ajouter le header: Content-Security-Policy</div>
+                </div>
+            </div>
+            <div class="vuln-card" style="border-left: 4px solid #0ea5e9; background: #f0f9ff;">
+                <div class="vuln-header">
+                    <span class="severity-badge" style="background:#0ea5e9; color:white;">MEDIUM</span>
+                    <span class="vuln-title">Header de sécurité manquant: X-Content-Type-Options</span>
+                    <span class="cvss-score">CVSS: 5.0</span>
+                </div>
+                <p class="vuln-desc">Le header X-Content-Type-Options est absent. Prévient le MIME sniffing</p>
+                <div class="vuln-meta">
+                    <div><strong> URL:</strong> <code>https://httpbin.org</code></div>
+                    <div><strong> Evidence:</strong> <code>Header 'X-Content-Type-Options' absent de la réponse</code></div>
+                    <div><strong> OWASP Mobile:</strong> <span class="tag">M8</span>
+                         <strong> OWASP API:</strong> <span class="tag">API8</span>
+                         <strong> CWE:</strong> <span class="tag">CWE-16</span></div>
+                    <div class="recommendation"><strong> Recommandation:</strong> Ajouter le header: X-Content-Type-Options</div>
+                </div>
+            </div>
+            <div class="vuln-card" style="border-left: 4px solid #0ea5e9; background: #f0f9ff;">
+                <div class="vuln-header">
+                    <span class="severity-badge" style="background:#0ea5e9; color:white;">MEDIUM</span>
+                    <span class="vuln-title">Header de sécurité manquant: X-Frame-Options</span>
+                    <span class="cvss-score">CVSS: 5.0</span>
+                </div>
+                <p class="vuln-desc">Le header X-Frame-Options est absent. Prévient le clickjacking</p>
+                <div class="vuln-meta">
+                    <div><strong> URL:</strong> <code>https://httpbin.org</code></div>
+                    <div><strong> Evidence:</strong> <code>Header 'X-Frame-Options' absent de la réponse</code></div>
+                    <div><strong> OWASP Mobile:</strong> <span class="tag">M8</span>
+                         <strong> OWASP API:</strong> <span class="tag">API8</span>
+                         <strong> CWE:</strong> <span class="tag">CWE-16</span></div>
+                    <div class="recommendation"><strong> Recommandation:</strong> Ajouter le header: X-Frame-Options</div>
+                </div>
+            </div>
+            <div class="vuln-card" style="border-left: 4px solid #0ea5e9; background: #f0f9ff;">
+                <div class="vuln-header">
+                    <span class="severity-badge" style="background:#0ea5e9; color:white;">MEDIUM</span>
+                    <span class="vuln-title">Header de sécurité manquant: X-XSS-Protection</span>
+                    <span class="cvss-score">CVSS: 5.0</span>
+                </div>
+                <p class="vuln-desc">Le header X-XSS-Protection est absent. Protection XSS</p>
+                <div class="vuln-meta">
+                    <div><strong> URL:</strong> <code>https://httpbin.org</code></div>
+                    <div><strong> Evidence:</strong> <code>Header 'X-XSS-Protection' absent de la réponse</code></div>
+                    <div><strong> OWASP Mobile:</strong> <span class="tag">M8</span>
+                         <strong> OWASP API:</strong> <span class="tag">API8</span>
+                         <strong> CWE:</strong> <span class="tag">CWE-16</span></div>
+                    <div class="recommendation"><strong> Recommandation:</strong> Ajouter le header: X-XSS-Protection</div>
+                </div>
+            </div>
+            <div class="vuln-card" style="border-left: 4px solid #0ea5e9; background: #f0f9ff;">
+                <div class="vuln-header">
+                    <span class="severity-badge" style="background:#0ea5e9; color:white;">MEDIUM</span>
+                    <span class="vuln-title">Méthode HTTP dangereuse acceptée: CONNECT</span>
+                    <span class="cvss-score">CVSS: 5.0</span>
+                </div>
+                <p class="vuln-desc">La méthode CONNECT est acceptée et peut être exploitée.</p>
+                <div class="vuln-meta">
+                    <div><strong> URL:</strong> <code>https://httpbin.org</code></div>
+                    <div><strong> Evidence:</strong> <code>HTTP CONNECT → 400</code></div>
+                    <div><strong> OWASP Mobile:</strong> <span class="tag">M8</span>
+                         <strong> OWASP API:</strong> <span class="tag">API8</span>
+                         <strong> CWE:</strong> <span class="tag">CWE-16</span></div>
+                    <div class="recommendation"><strong> Recommandation:</strong> Désactiver la méthode CONNECT si non nécessaire.</div>
+                </div>
+            </div>
+            <div class="vuln-card" style="border-left: 4px solid #22c55e; background: #f0fdf4;">
+                <div class="vuln-header">
+                    <span class="severity-badge" style="background:#22c55e; color:white;">LOW</span>
+                    <span class="vuln-title">Header de sécurité manquant: Referrer-Policy</span>
+                    <span class="cvss-score">CVSS: 2.5</span>
+                </div>
+                <p class="vuln-desc">Le header Referrer-Policy est absent. Politique de référent</p>
+                <div class="vuln-meta">
+                    <div><strong> URL:</strong> <code>https://httpbin.org</code></div>
+                    <div><strong> Evidence:</strong> <code>Header 'Referrer-Policy' absent de la réponse</code></div>
+                    <div><strong> OWASP Mobile:</strong> <span class="tag">M8</span>
+                         <strong> OWASP API:</strong> <span class="tag">API8</span>
+                         <strong> CWE:</strong> <span class="tag">CWE-16</span></div>
+                    <div class="recommendation"><strong> Recommandation:</strong> Ajouter le header: Referrer-Policy</div>
+                </div>
+            </div>
+            <div class="vuln-card" style="border-left: 4px solid #22c55e; background: #f0fdf4;">
+                <div class="vuln-header">
+                    <span class="severity-badge" style="background:#22c55e; color:white;">LOW</span>
+                    <span class="vuln-title">Header de sécurité manquant: Permissions-Policy</span>
+                    <span class="cvss-score">CVSS: 2.5</span>
+                </div>
+                <p class="vuln-desc">Le header Permissions-Policy est absent. Politique des permissions</p>
+                <div class="vuln-meta">
+                    <div><strong> URL:</strong> <code>https://httpbin.org</code></div>
+                    <div><strong> Evidence:</strong> <code>Header 'Permissions-Policy' absent de la réponse</code></div>
+                    <div><strong> OWASP Mobile:</strong> <span class="tag">M8</span>
+                         <strong> OWASP API:</strong> <span class="tag">API8</span>
+                         <strong> CWE:</strong> <span class="tag">CWE-16</span></div>
+                    <div class="recommendation"><strong> Recommandation:</strong> Ajouter le header: Permissions-Policy</div>
+                </div>
+            </div>
+            <div class="vuln-card" style="border-left: 4px solid #22c55e; background: #f0fdf4;">
+                <div class="vuln-header">
+                    <span class="severity-badge" style="background:#22c55e; color:white;">LOW</span>
+                    <span class="vuln-title">Header révélant des informations: Server</span>
+                    <span class="cvss-score">CVSS: 2.5</span>
+                </div>
+                <p class="vuln-desc">Le header Server révèle des informations sensibles. Révèle le serveur web et sa version</p>
+                <div class="vuln-meta">
+                    <div><strong> URL:</strong> <code>https://httpbin.org</code></div>
+                    <div><strong> Evidence:</strong> <code>Server: gunicorn/19.9.0</code></div>
+                    <div><strong> OWASP Mobile:</strong> <span class="tag">M8</span>
+                         <strong> OWASP API:</strong> <span class="tag">API8</span>
+                         <strong> CWE:</strong> <span class="tag">CWE-200</span></div>
+                    <div class="recommendation"><strong> Recommandation:</strong> Supprimer ou masquer le header Server.</div>
+                </div>
+            </div>
+  </div>
+
+  <!-- Endpoints -->
+  <div class="section">
+    <h2> Endpoints Découverts (0)</h2>
+    <table class="endpoint-table">
+      <thead><tr><th>Chemin</th><th>Méthodes</th><th>Status</th><th>Source</th></tr></thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Généré par Mobile API Vulnerability Scanner · OWASP Mobile Top 10 & API Security Top 10</p>
+  <p>Ce rapport est confidentiel et destiné à des fins de sécurité uniquement.</p>
+</div>
+</body>
+</html>

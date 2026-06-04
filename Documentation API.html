@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mobile API Vulnerability Scanner - Docs</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css"/>
+  <style>
+    body { margin: 0; background: #fafafa; }
+    .swagger-ui .topbar { background: #1a1a2e; }
+    .swagger-ui .topbar .download-url-wrapper { display: none; }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-standalone-preset.js"></script>
+  <script>
+    const spec = {
+      "openapi": "3.1.0",
+      "info": {
+        "title": "Mobile API Vulnerability Scanner",
+        "description": "Scanner automatisé de vulnérabilités pour APIs mobiles - OWASP",
+        "version": "1.0.0"
+      },
+      "paths": {
+        "/": {
+          "get": {
+            "summary": "Root",
+            "description": "Interface web principale",
+            "operationId": "root__get",
+            "responses": {
+              "200": {
+                "description": "Successful Response",
+                "content": { "text/html": { "schema": { "type": "string" } } }
+              }
+            }
+          }
+        },
+        "/api/scan": {
+          "post": {
+            "summary": "Start Scan",
+            "description": "Lance un scan de vulnérabilités sur une API mobile",
+            "operationId": "start_scan_api_scan_post",
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["target_url"],
+                    "title": "ScanRequest",
+                    "properties": {
+                      "target_url": { "type": "string", "title": "Target Url" },
+                      "options": {
+                        "type": "object",
+                        "title": "ScanOptions",
+                        "properties": {
+                          "scan_level": { "type": "string", "enum": ["passive","active","aggressive"], "default": "active" },
+                          "auth_type": { "type": "string", "enum": ["none","bearer","api_key","basic"], "default": "none" },
+                          "auth_token": { "anyOf": [{"type":"string"},{"type":"null"}], "title": "Auth Token" },
+                          "api_key": { "anyOf": [{"type":"string"},{"type":"null"}], "title": "Api Key" },
+                          "custom_headers": { "type": "object", "additionalProperties": {"type":"string"}, "default": {} },
+                          "timeout": { "type": "integer", "default": 10 },
+                          "max_endpoints": { "type": "integer", "default": 50 },
+                          "check_owasp_mobile": { "type": "boolean", "default": true },
+                          "check_owasp_api": { "type": "boolean", "default": true },
+                          "check_ssl": { "type": "boolean", "default": true },
+                          "check_auth": { "type": "boolean", "default": true },
+                          "check_injection": { "type": "boolean", "default": true },
+                          "check_broken_auth": { "type": "boolean", "default": true }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": { "description": "Successful Response", "content": { "application/json": { "schema": { "type": "object" } } } },
+              "422": {
+                "description": "Validation Error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "detail": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": ["loc","msg","type"],
+                            "properties": {
+                              "loc": { "type": "array", "items": { "anyOf": [{"type":"string"},{"type":"integer"}] } },
+                              "msg": { "type": "string" },
+                              "type": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/scan/{scan_id}/status": {
+          "get": {
+            "summary": "Get Scan Status",
+            "description": "Récupère le statut d'un scan",
+            "operationId": "get_scan_status_api_scan__scan_id__status_get",
+            "parameters": [{ "name": "scan_id", "in": "path", "required": true, "schema": { "type": "string", "title": "Scan Id" } }],
+            "responses": {
+              "200": { "description": "Successful Response", "content": { "application/json": { "schema": {} } } },
+              "422": { "description": "Validation Error", "content": { "application/json": { "schema": { "type": "object" } } } }
+            }
+          }
+        },
+        "/api/scan/{scan_id}/results": {
+          "get": {
+            "summary": "Get Scan Results",
+            "description": "Récupère les résultats complets d'un scan",
+            "operationId": "get_scan_results_api_scan__scan_id__results_get",
+            "parameters": [{ "name": "scan_id", "in": "path", "required": true, "schema": { "type": "string", "title": "Scan Id" } }],
+            "responses": {
+              "200": { "description": "Successful Response", "content": { "application/json": { "schema": {} } } },
+              "422": { "description": "Validation Error", "content": { "application/json": { "schema": { "type": "object" } } } }
+            }
+          }
+        },
+        "/api/scan/{scan_id}/report": {
+          "get": {
+            "summary": "Download Report",
+            "description": "Télécharge le rapport de vulnérabilités",
+            "operationId": "download_report_api_scan__scan_id__report_get",
+            "parameters": [
+              { "name": "scan_id", "in": "path", "required": true, "schema": { "type": "string", "title": "Scan Id" } },
+              { "name": "format", "in": "query", "required": false, "schema": { "type": "string", "default": "html", "title": "Format" } }
+            ],
+            "responses": {
+              "200": { "description": "Successful Response", "content": { "application/json": { "schema": {} } } },
+              "422": { "description": "Validation Error", "content": { "application/json": { "schema": { "type": "object" } } } }
+            }
+          }
+        },
+        "/api/scans": {
+          "get": {
+            "summary": "List Scans",
+            "description": "Liste tous les scans effectués",
+            "operationId": "list_scans_api_scans_get",
+            "responses": {
+              "200": { "description": "Successful Response", "content": { "application/json": { "schema": {} } } }
+            }
+          }
+        },
+        "/api/vulnerabilities/owasp": {
+          "get": {
+            "summary": "Get Owasp List",
+            "description": "Retourne la liste des vulnérabilités OWASP Mobile Top 10",
+            "operationId": "get_owasp_list_api_vulnerabilities_owasp_get",
+            "responses": {
+              "200": { "description": "Successful Response", "content": { "application/json": { "schema": {} } } }
+            }
+          }
+        }
+      }
+    };
+
+    window.onload = function() {
+      SwaggerUIBundle({
+        spec: spec,
+        dom_id: '#swagger-ui',
+        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+        plugins: [SwaggerUIBundle.plugins.DownloadUrl],
+        layout: "StandaloneLayout",
+        validatorUrl: null
+      });
+    };
+  </script>
+</body>
+</html>

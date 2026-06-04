@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobile API Security Scanner | Enterprise Edition</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --primary: #0d6efd;
+    --secondary: #6c757d;
+    --success: #198754;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --info: #0dcaf0;
+    --dark: #212529;
+  }
+
+  body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+    font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Navbar */
+  .navbar {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 0.75rem 0;
+  }
+
+  .navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, var(--primary), #0a58ca);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .nav-badge {
+    background: #e7f1ff;
+    color: var(--primary);
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+  }
+
+  /* Cards */
+  .card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  }
+
+  .card-header {
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1.25rem 1.5rem;
+    font-weight: 600;
+    border-radius: 1rem 1rem 0 0 !important;
+  }
+
+  /* Form controls */
+  .form-control, .form-select {
+    border: 1.5px solid #e9ecef;
+    border-radius: 0.75rem;
+    padding: 0.7rem 1rem;
+    transition: all 0.2s;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.15);
+  }
+
+  /* Buttons */
+  .btn {
+    border-radius: 0.75rem;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), #0a58ca);
+    border: none;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13,110,253,0.3);
+  }
+
+  /* Option cards */
+  .option-card {
+    border: 1.5px solid #e9ecef;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+  }
+
+  .option-card:hover {
+    border-color: var(--primary);
+    background: #f8f9fa;
+  }
+
+  .option-card.active {
+    border-color: var(--primary);
+    background: #e7f1ff;
+  }
+
+  .option-card label {
+    cursor: pointer;
+    font-weight: 500;
+    margin-left: 0.5rem;
+  }
+
+  /* Progress */
+  .progress {
+    height: 0.5rem;
+    border-radius: 1rem;
+  }
+
+  .progress-steps {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  .step {
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: #f8f9fa;
+    color: #6c757d;
+  }
+
+  .step.active {
+    background: #e7f1ff;
+    color: var(--primary);
+  }
+
+  .step.completed {
+    background: #d1e7dd;
+    color: var(--success);
+  }
+
+  /* Stats */
+  .stat-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.25rem;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Risk meter */
+  .risk-panel {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+  }
+
+  .risk-score {
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .risk-value {
+    font-size: 3rem;
+    font-weight: 800;
+  }
+
+  /* Vulnerability items */
+  .vuln-item {
+    border: 1px solid #e9ecef;
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+
+  .vuln-header {
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    background: white;
+    transition: background 0.2s;
+  }
+
+  .vuln-header:hover {
+    background: #f8f9fa;
+  }
+
+  .severity-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: inline-block;
+  }
+
+  .severity-CRITICAL { background: #f8d7da; color: #721c24; }
+  .severity-HIGH { background: #fff3cd; color: #856404; }
+  .severity-MEDIUM { background: #d1ecf1; color: #0c5460; }
+  .severity-LOW { background: #d4edda; color: #155724; }
+
+  .vuln-body {
+    display: none;
+    padding: 1.25rem;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .vuln-body.open {
+    display: block;
+  }
+
+  /* Meta grid */
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .meta-item {
+    background: white;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e9ecef;
+  }
+
+  .meta-item label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--secondary);
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .meta-item code {
+    font-size: 0.8rem;
+    color: var(--primary);
+    word-break: break-all;
+  }
+
+  .remediation-box {
+    background: #d1e7dd;
+    border-left: 4px solid var(--success);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  /* Filter tabs */
+  .filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-tab {
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: #f8f9fa;
+    color: var(--secondary);
+    transition: all 0.2s;
+  }
+
+  .filter-tab:hover {
+    background: #e9ecef;
+  }
+
+  .filter-tab.active {
+    background: var(--primary);
+    color: white;
+  }
+
+  /* Demo chips */
+  .demo-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .demo-chip:hover {
+    border-color: var(--primary);
+    background: #e7f1ff;
+  }
+
+  /* Table */
+  .table-endpoints {
+    font-size: 0.85rem;
+  }
+
+  .table-endpoints th {
+    background: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+  }
+
+  .method-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    margin-right: 0.25rem;
+  }
+
+  .method-GET { background: #d4edda; color: #155724; }
+  .method-POST { background: #fff3cd; color: #856404; }
+  .method-PUT { background: #d1ecf1; color: #0c5460; }
+  .method-DELETE { background: #f8d7da; color: #721c24; }
+  .method-PATCH { background: #e2d5f1; color: #4a1d6d; }
+
+  /* Spinner */
+  .spinner-small {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar sticky-top">
+  <div class="container">
+    <div>
+      <span class="navbar-brand">
+        <i class="fas fa-shield-alt me-2"></i>
+        Mobile API Security Scanner
+      </span>
+    </div>
+    <div>
+      <span class="nav-badge">OWASP Mobile Top 10</span>
+      <span class="nav-badge">OWASP API Top 10</span>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+
+  <!-- Scan Card -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <i class="fas fa-search me-2 text-primary"></i> Nouvelle Analyse de Sécurité
+      <div class="float-end">
+        <select class="form-select form-select-sm" id="scanLevel" style="width: auto;">
+          <option value="passive">Mode Passif (Lecture seule)</option>
+          <option value="active" selected>Mode Actif (Recommandé)</option>
+          <option value="aggressive">Mode Agressif (Complet)</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-8">
+          <input type="text" class="form-control" id="targetUrl" placeholder="https://api.votre-domaine.com" value="https://httpbin.org">
+        </div>
+        <div class="col-md-4">
+          <button class="btn btn-primary w-100" id="btnScan" onclick="startScan()">
+            <i class="fas fa-play me-2"></i> Lancer l'analyse
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <div class="small text-muted mb-2">Cibles de démonstration :</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <span class="demo-chip" onclick="setTarget('https://httpbin.org')"><i class="fas fa-flask"></i> httpbin.org</span>
+          <span class="demo-chip" onclick="setTarget('https://jsonplaceholder.typicode.com')"><i class="fas fa-code"></i> JSONPlaceholder</span>
+          <span class="demo-chip" onclick="setTarget('https://reqres.in')"><i class="fas fa-users"></i> ReqRes.in</span>
+          <span class="demo-chip" onclick="setTarget('https://api.restful-api.dev')"><i class="fas fa-database"></i> Restful API</span>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <div class="small fw-semibold text-muted mb-3">TESTS DE SÉCURITÉ ACTIFS</div>
+      <div class="row g-2">
+        <div class="col-md-3">
+          <div class="option-card active" onclick="toggleOption(this)">
+            <i class="fas fa-lock text-primary me-2"></i>
+            <input type="checkbox" id="optSSL" checked class="d-none">
+            <label>SSL / TLS</label>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="option-card active" onclick="toggleOption(this)">
+            <i class="fas fa-code text-primary me-2"></i>
+            <input type="checkbox" id="optHeaders" checked class="d-none">
+            <label>Security Headers</label>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="option-card active" onclick="toggleOption(this)">
+            <i class="fas fa-globe text-primary me-2"></i>
+            <input type="checkbox" id="optCORS" checked class="d-none">
+            <label>CORS Policy</label>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="option-card active" onclick="toggleOption(this)">
+            <i class="fas fa-key text-primary me-2"></i>
+            <input type="checkbox" id="optAuth" checked class="d-none">
+            <label>Auth & JWT</label>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="option-card active" onclick="toggleOption(this)">
+            <i class="fas fa-database text-primary me-2"></i>
+            <input type="checkbox" id="optInjection" checked class="d-none">
+            <label>Injections (SQL/NoSQL)</label>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="option-card active" onclick="toggleOption(this)">
+            <i class="fas fa-user-shield text-primary me-2"></i>
+            <input type="checkbox" id="optAdmin" checked class="d-none">
+            <label>Admin Endpoints</label>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="option-card active" onclick="toggleOption(this)">
+            <i class="fas fa-tachometer-alt text-primary me-2"></i>
+            <input type="checkbox" id="optRateLimit" checked class="d-none">
+            <label>Rate Limiting</label>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="option-card active" onclick="toggleOption(this)">
+            <i class="fas fa-id-card text-primary me-2"></i>
+            <input type="checkbox" id="optIDOR" checked class="d-none">
+            <label>IDOR / BOLA</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Panel -->
+  <div class="card mb-4" id="progressPanel" style="display: none;">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="fw-semibold">
+          <span class="spinner-border spinner-small me-2" role="status"></span>
+          Analyse en cours...
+        </span>
+        <span id="progressPct" class="fw-bold text-primary">0%</span>
+      </div>
+      <div class="progress mb-3">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressFill" style="width: 0%"></div>
+      </div>
+      <div class="progress-steps" id="progressSteps">
+        <span class="step" id="step1">Découverte endpoints</span>
+        <span class="step" id="step2">Tests SSL/TLS</span>
+        <span class="step" id="step3">Headers sécurité</span>
+        <span class="step" id="step4">Tests injections</span>
+        <span class="step" id="step5">Tests authentification</span>
+        <span class="step" id="step6">Génération rapport</span>
+      </div>
+      <div id="progressMsg" class="small text-muted mt-3"></div>
+    </div>
+  </div>
+
+  <!-- Results Panel -->
+  <div id="resultsPanel" style="display: none;">
+
+    <!-- Action Bar -->
+    <div class="d-flex gap-2 mb-4">
+      <button class="btn btn-primary" onclick="downloadReport('html')">
+        <i class="fas fa-file-alt me-2"></i>Rapport HTML
+      </button>
+      <button class="btn btn-outline-secondary" onclick="downloadReport('json')">
+        <i class="fas fa-code me-2"></i>Export JSON
+      </button>
+      <button class="btn btn-outline-secondary" onclick="newScan()">
+        <i class="fas fa-plus me-2"></i>Nouveau scan
+      </button>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="row g-3 mb-4" id="statsGrid"></div>
+
+    <!-- Risk Panel -->
+    <div class="card mb-4" id="riskPanel"></div>
+
+    <!-- OWASP Coverage -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <i class="fas fa-chart-line me-2 text-primary"></i> Couverture des Standards OWASP
+      </div>
+      <div class="card-body" id="owaspSection"></div>
+    </div>
+
+    <!-- Vulnerabilities -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <i class="fas fa-exclamation-triangle me-2 text-warning"></i> Vulnérabilités Détectées
+      </div>
+      <div class="card-body">
+        <div class="filter-tabs" id="filterTabs">
+          <span class="filter-tab active" onclick="filterVulns('ALL', this)">Toutes</span>
+          <span class="filter-tab" onclick="filterVulns('CRITICAL', this)">Critique</span>
+          <span class="filter-tab" onclick="filterVulns('HIGH', this)">Élevé</span>
+          <span class="filter-tab" onclick="filterVulns('MEDIUM', this)">Moyen</span>
+          <span class="filter-tab" onclick="filterVulns('LOW', this)">Faible</span>
+        </div>
+        <div id="vulnList"></div>
+      </div>
+    </div>
+
+    <!-- Endpoints -->
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-link me-2 text-primary"></i> Endpoints Découverts
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive" id="endpointsSection"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+let currentScanId = null;
+let allVulns = [];
+
+function setTarget(url) {
+  document.getElementById('targetUrl').value = url;
+}
+
+function toggleOption(card) {
+  card.classList.toggle('active');
+  const cb = card.querySelector('input[type=checkbox]');
+  cb.checked = !cb.checked;
+}
+
+async function startScan() {
+  const url = document.getElementById('targetUrl').value.trim();
+  if (!url) return alert('Veuillez saisir une URL cible');
+
+  const btn = document.getElementById('btnScan');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-small me-2" role="status"></span> Lancement...';
+
+  document.getElementById('progressPanel').style.display = 'block';
+  document.getElementById('resultsPanel').style.display = 'none';
+  resetSteps();
+
+  const options = {
+    scan_level: document.getElementById('scanLevel').value,
+    check_ssl: document.getElementById('optSSL').checked,
+    check_headers: document.getElementById('optHeaders').checked,
+    check_cors: document.getElementById('optCORS').checked,
+    check_auth: document.getElementById('optAuth').checked,
+    check_injection: document.getElementById('optInjection').checked,
+    check_admin: document.getElementById('optAdmin').checked,
+    check_rate_limit: document.getElementById('optRateLimit').checked,
+    check_idor: document.getElementById('optIDOR').checked
+  };
+
+  try {
+    const res = await fetch('/api/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target_url: url, options })
+    });
+    const data = await res.json();
+    currentScanId = data.scan_id;
+    pollStatus(currentScanId);
+  } catch(e) {
+    alert('Erreur lors du lancement du scan: ' + e.message);
+    resetUI();
+  }
+}
+
+function resetSteps() {
+  for (let i = 1; i <= 6; i++) {
+    const s = document.getElementById('step'+i);
+    s.classList.remove('active', 'completed');
+  }
+}
+
+async function pollStatus(scanId) {
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch(`/api/scan/${scanId}/status`);
+      const data = await res.json();
+      const pct = data.progress || 0;
+
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('progressPct').textContent = pct + '%';
+
+      const stepThresholds = [[10,1], [25,2], [40,3], [60,4], [80,5], [95,6]];
+      for (const [threshold, stepNum] of stepThresholds) {
+        const el = document.getElementById('step'+stepNum);
+        if (pct >= threshold) el.classList.add('completed');
+        else if (pct >= threshold - 15) el.classList.add('active');
+      }
+
+      document.getElementById('progressMsg').textContent = `Cible: ${data.target} · Statut: ${data.status}`;
+
+      if (data.status === 'completed') {
+        clearInterval(interval);
+        document.getElementById('progressFill').style.width = '100%';
+        document.getElementById('progressPct').textContent = '100%';
+        for (let i = 1; i <= 6; i++) document.getElementById('step'+i).classList.add('completed');
+        setTimeout(() => loadResults(scanId), 500);
+      } else if (data.status === 'failed') {
+        clearInterval(interval);
+        document.getElementById('progressMsg').textContent = 'Scan échoué: ' + (data.error || 'Erreur inconnue');
+        resetUI();
+      }
+    } catch(e) {
+      clearInterval(interval);
+      resetUI();
+    }
+  }, 1500);
+}
+
+async function loadResults(scanId) {
+  const res = await fetch(`/api/scan/${scanId}/results`);
+  const data = await res.json();
+  allVulns = data.vulnerabilities || [];
+  renderResults(data);
+  document.getElementById('progressPanel').style.display = 'none';
+  document.getElementById('resultsPanel').style.display = 'block';
+  resetUI();
+}
+
+function renderResults(data) {
+  const sev = data.severity_breakdown || {};
+  
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="col-md-2 col-6">
+      <div class="stat-card"><div class="stat-number text-danger">${sev.critical||0}</div><div class="stat-label">Critique</div></div>
+    </div>
+    <div class="col-md-2 col-6">
+      <div class="stat-card"><div class="stat-number text-warning">${sev.high||0}</div><div class="stat-label">Élevé</div></div>
+    </div>
+    <div class="col-md-2 col-6">
+      <div class="stat-card"><div class="stat-number text-info">${sev.medium||0}</div><div class="stat-label">Moyen</div></div>
+    </div>
+    <div class="col-md-2 col-6">
+      <div class="stat-card"><div class="stat-number text-success">${sev.low||0}</div><div class="stat-label">Faible</div></div>
+    </div>
+    <div class="col-md-2 col-6">
+      <div class="stat-card"><div class="stat-number text-primary">${data.endpoints_discovered||0}</div><div class="stat-label">Endpoints</div></div>
+    </div>
+    <div class="col-md-2 col-6">
+      <div class="stat-card"><div class="stat-number text-secondary">${data.total_vulnerabilities||0}</div><div class="stat-label">Total vulnérabilités</div></div>
+    </div>
+  `;
+
+  const riskColors = { 'CRITIQUE': '#dc3545', 'ÉLEVÉ': '#ffc107', 'MOYEN': '#0dcaf0', 'FAIBLE': '#198754' };
+  const rc = riskColors[data.risk_level] || '#6c757d';
+
+  document.getElementById('riskPanel').innerHTML = `
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-3 text-center">
+          <div class="risk-score">
+            <div class="risk-value" style="color: ${rc}">${data.risk_score}</div>
+            <div class="small text-muted">/ 10 - Score de risque</div>
+          </div>
+        </div>
+        <div class="col-md-9">
+          <h5 class="mb-2" style="color: ${rc}">Niveau de risque : ${data.risk_level || 'INCONNU'}</h5>
+          <p class="text-muted small mb-2">Score basé sur la sévérité et le nombre de vulnérabilités détectées</p>
+          <div class="small text-secondary">
+            <i class="far fa-calendar-alt me-1"></i> Scan effectué le ${new Date(data.scan_date).toLocaleString('fr-FR')}<br>
+            <i class="fas fa-check-circle text-success me-1"></i> Cible analysée: ${data.target_url}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const owasp = data.owasp_coverage || {};
+  document.getElementById('owaspSection').innerHTML = `
+    <div class="row">
+      <div class="col-md-6 mb-3 mb-md-0">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="fw-semibold"><i class="fas fa-mobile-alt me-2 text-primary"></i> OWASP Mobile Top 10</span>
+          <strong class="text-primary">${owasp.mobile_coverage_percent||0}%</strong>
+        </div>
+        <div class="progress mb-2" style="height: 0.5rem;">
+          <div class="progress-bar bg-primary" style="width: ${owasp.mobile_coverage_percent||0}%"></div>
+        </div>
+        <div class="small text-muted">Catégories testées: ${(owasp.mobile_top10_tested||[]).join(', ') || 'Aucune'}</div>
+      </div>
+      <div class="col-md-6">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="fw-semibold"><i class="fas fa-plug me-2 text-secondary"></i> OWASP API Top 10</span>
+          <strong class="text-secondary">${owasp.api_coverage_percent||0}%</strong>
+        </div>
+        <div class="progress mb-2" style="height: 0.5rem;">
+          <div class="progress-bar bg-secondary" style="width: ${owasp.api_coverage_percent||0}%"></div>
+        </div>
+        <div class="small text-muted">Catégories testées: ${(owasp.api_top10_tested||[]).join(', ') || 'Aucune'}</div>
+      </div>
+    </div>
+  `;
+
+  renderVulns(allVulns);
+
+  const endpoints = data.endpoints || [];
+  document.getElementById('endpointsSection').innerHTML = `
+    <table class="table table-hover table-endpoints mb-0">
+      <thead>
+        <tr><th>Chemin</th><th>Méthodes</th><th>Status</th><th>Source</th></tr>
+      </thead>
+      <tbody>
+        ${endpoints.slice(0, 30).map(e => `
+          <tr>
+            <td><code class="text-primary">${e.path||'N/A'}</code></td>
+            <td>${(e.methods||[]).map(m => `<span class="method-badge method-${m}">${m}</span>`).join('')}</td>
+            <td><span class="badge ${e.status_code===200 ? 'bg-success' : e.status_code===401 ? 'bg-warning' : 'bg-secondary'}">${e.status_code||'N/A'}</span></td>
+            <td class="small text-muted">${e.source||'N/A'}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderVulns(vulns) {
+  if (!vulns.length) {
+    document.getElementById('vulnList').innerHTML = '<div class="text-center text-muted py-5"><i class="fas fa-check-circle fa-2x mb-2 d-block"></i>Aucune vulnérabilité trouvée pour ce filtre</div>';
+    return;
+  }
+
+  document.getElementById('vulnList').innerHTML = vulns.map((v, i) => `
+    <div class="vuln-item">
+      <div class="vuln-header" onclick="toggleVuln(${i})">
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-3">
+            <span class="severity-badge severity-${v.severity}">${v.severity}</span>
+            <span class="fw-semibold">${v.title}</span>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <span class="small text-muted">CVSS ${v.cvss_score || 'N/A'}</span>
+            <i class="fas fa-chevron-down text-muted small"></i>
+          </div>
+        </div>
+      </div>
+      <div class="vuln-body" id="vbody-${i}">
+        <p class="mb-3">${v.description}</p>
+        <div class="meta-grid">
+          <div class="meta-item">
+            <label>Endpoint</label>
+            <code>${v.url || 'N/A'}</code>
+          </div>
+          <div class="meta-item">
+            <label>Evidence</label>
+            <code>${v.evidence || 'N/A'}</code>
+          </div>
+          <div class="meta-item">
+            <label>Références OWASP</label>
+            <code>${v.owasp_mobile || 'N/A'} | ${v.owasp_api || 'N/A'}</code>
+          </div>
+          <div class="meta-item">
+            <label>CWE</label>
+            <code>${v.cwe || 'N/A'}</code>
+          </div>
+        </div>
+        <div class="remediation-box">
+          <i class="fas fa-tools me-2"></i><strong>Recommandation:</strong><br>
+          ${v.recommendation || 'N/A'}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleVuln(i) {
+  document.getElementById(`vbody-${i}`).classList.toggle('open');
+}
+
+function filterVulns(severity, tab) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  const filtered = severity === 'ALL' ? allVulns : allVulns.filter(v => v.severity === severity);
+  renderVulns(filtered);
+}
+
+async function downloadReport(format) {
+  if (!currentScanId) return;
+  window.open(`/api/scan/${currentScanId}/report?format=${format}`, '_blank');
+}
+
+function newScan() {
+  currentScanId = null;
+  allVulns = [];
+  document.getElementById('resultsPanel').style.display = 'none';
+  document.getElementById('progressPanel').style.display = 'none';
+  resetUI();
+}
+
+function resetUI() {
+  const btn = document.getElementById('btnScan');
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-play me-2"></i> Lancer l\'analyse';
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
